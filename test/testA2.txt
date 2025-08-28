@@ -1,0 +1,25 @@
+program Test1
+
+{
+
+	int ispis(int x) { return x; }
+
+
+	void main() int a,b,c,i; int arr[]; {
+	
+	
+	   	//arr = new int[5];
+		//arr[0]++;
+		
+		//print(arr[0]);  
+		
+		//a = ispis() + 2;
+		//print(a);
+	   
+	   //ispis();ispis();ispis();ispis();ispis();ispis();ispis();ispis();ispis();
+		
+		print(ispis(14));
+		
+	}
+
+}

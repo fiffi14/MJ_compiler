@@ -1,0 +1,30 @@
+program IFDOWHILEtest
+
+{
+
+	void main() int i; {
+		
+		i = 10;
+		
+		if(i==2 || i<=3)
+			if(i==7)
+				print(1);
+			else
+				print(2);
+		else
+			if(i==4)
+				print(3);
+			
+			print(i);
+			
+		print(eol);
+		
+		i = 5;
+		
+		do {
+			print(i);
+			i--;
+		} while(i>0);
+	
+	}
+}

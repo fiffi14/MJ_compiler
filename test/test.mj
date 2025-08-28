@@ -1,0 +1,125 @@
+program FIFU
+
+const int a = 5;
+const char c = 'a';
+
+int arr[];
+char x,y[];
+
+set s1;
+
+const bool f = false;
+
+{
+	
+	int m2(){
+		
+		m2();
+		return 2;
+		
+	}
+	
+	void main() int b; bool eol; int x[], y; set s2, s3; int w;{
+		//print(x[5]);
+		//b = 3 + x[3]*y; //transfer iz niza u elm za x[3]
+		
+		//a = b;     ERR
+		//a = 3 + b; ERR
+		//a = 3;     ERR
+		
+		//b = 3; // OK
+		
+		//x = new int[5];  // OK
+		w = x[1];
+		
+		
+		
+		//w = s1.v;
+		
+		//x[4] = x[2];
+		
+		//null = x; // ERR (imamo SRC.assignableTo(DST)
+		
+		//arr = null;  OK
+		
+		//x++;  ERR
+		
+		//b++;		OK
+		//x[2]++;	OK
+		//x[1]--;	OK
+		//x++;		ERR
+		//eol++;	ERR
+		
+		s1 = new set[5];
+		//s2 = new set[2];
+		//s3 = new set[3];
+		
+		//s1 = s2 union s3;	 //OK
+		//b = s2 union s3;	 ERR
+		//s2 = x union s2;	 ERR
+		//s3 = s1 union eol; ERR
+		
+		//read(x); ERR 
+		//read(b); OK
+		
+		//read(x[2]); OOKK
+		
+		//print(b);       OK
+		//print(x[2], 3); OK
+		//print(true, 2); OK
+		//print(x);       ERR
+		
+		//b = x[x[2]]; OK
+		
+		//m1(5); ERR ZATO STO JE KASNIJE DEKLASRISANO ~ NEDEFINISANO
+		
+		//m2();
+		
+		
+		//b = m2();  !!!
+		
+		//return ; //OK sa i bez
+	
+	}
+		
+	bool m1(int fp1) bool abc; int p[], q[]; {
+		
+		//main();
+		
+	//	do {
+	//	
+	//		continue;
+	//		break;
+	//		do {
+	//			break;
+	//			continue;
+	//		} while(true); 
+	//		continue;
+	//		break; // OK - jer je u do-while petlji
+	//	} while(true);
+		
+		//if(true || abc && a < 2) { fp1++; } OK
+		
+		//if(p == q) fp1++; OK
+		//if(p != q) fp1++; OK
+		//if(p < q) fp1++;  ERR
+		
+		
+		return abc;
+	}
+	
+	int f1(int x) { return x; }
+	int f2(int x, bool b, int g) { return f1(x) + 1; }
+	
+	int f3() char s[]; { 
+	
+		//f2(f2(1, false), true, f2(14, true));  // ERRR
+		f2(f2(1, false, 2), true, f2(14, true, 9));  // OKKK
+		
+		//s = new int[5];
+		
+		return 1;
+	} 	
+	
+}
+

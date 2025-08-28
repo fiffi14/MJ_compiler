@@ -1,0 +1,59 @@
+program FIFU
+
+set s1;
+set s2;
+set s3;
+
+{
+	
+	int f(int i) {
+		return i + 2;
+	}
+
+
+	void main() int i,arr[]; {
+	
+		s1 = new set[2];
+		
+		i = 5;
+		
+		add(s1,i);
+		
+		add(s1, 3);
+		
+		add(s1, 4);
+		
+		print(s1);
+		
+		//s1[0];
+		
+		arr = new int[2];
+		arr[0] = 1;
+		arr[1] = 2;
+		
+		
+		//print(s1); print(eol);
+		//print(arr);
+		
+		addAll(s1,arr);
+		
+		print(eol);
+		print(s1, 7);
+		
+		//i = f map arr;
+		print(eol);
+		print(f map arr);
+		
+		s2 = new set[2];
+		
+		add(s2, 6);
+		add(s2, 7);
+		
+		s3 = new set[5];
+		
+		s3 = s1 union s2;
+		print(eol);
+		print(s3);
+	}
+
+}
