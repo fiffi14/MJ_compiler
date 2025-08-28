@@ -1,0 +1,383 @@
+package rs.ac.bg.etf.pp1;
+
+import java_cup.runtime.*;
+import org.apache.log4j.*;
+import rs.ac.bg.etf.pp1.ast.*;
+
+parser code {:
+
+	boolean errorDetected;
+	
+	Logger log = Logger.getLogger(getClass());
+	
+	//slede redefinisani metodi za prijavu gresaka radi izmene teksta poruke
+	
+	public void report_fatal_error(String message, Object info) throws java.lang.Exception {
+		done_parsing();
+		report_error(message, info);
+	}
+	
+	public void syntax_error(Symbol cur_token) {
+		report_error("\nSintaksna greska", cur_token);
+	}
+	
+	public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception {
+		report_fatal_error("Fatalna greska, parsiranje se ne moze nastaviti", cur_token);
+	}
+	
+	// pozivanje kod smena da u slucaju greske prijavi istu da bi se izvrsio oporavak
+	
+	public void report_error(String message, Object info) {
+		errorDetected = true;
+		StringBuilder msg = new StringBuilder(message);
+		if (info instanceof Symbol) 
+			msg.append(" na liniji ").append(((Symbol)info).left);
+		log.error(msg.toString());
+	}
+:}
+
+init with {:
+	errorDetected = false;
+:}
+
+scan with {:
+	Symbol s = this.getScanner().next_token();
+	if (s != null && s.value != null)
+		log.info(s.toString() + " " + s.value.toString());
+	return s;
+:}
+
+terminal PROG, CONST, ASSIGN, COMMA, SEMI, LEFTBRACKET, RIGHTBRACKET, VOID, LEFTPAREN, RIGHTPAREN, LEFTBRACE, RIGHTBRACE, DOT, TWODOTS, HASH, FOR, CAPPA, FINAL;
+terminal IF, ELSE, BREAK, CONTINUE, RETURN, READ, PRINT, DO, WHILE, OR, AND, EQ, NOTEQ, GRT, GRTEQ, LSS, LSSEQ, PLUS, MINUS, MUL, DIV, MOD, UNION, MAP, NEW, INC, DEC;
+terminal String IDENT;
+terminal Integer NUMBER, BOOL;
+terminal Character CHARACTER;
+
+nonterminal Program, ConstVarDeclList, ConstDeclList, ConstDecl, CommaConstDecl, Constant, VarDeclList,
+VarDecl, CommaVarDecl;
+nonterminal MethodSignature, MethodDecl, MethodDeclList, FormParsList, FormPars, CommaFormPars, VarDeclListMore;
+nonterminal StatementList, Statement, SingleStatement, ElseStatement, StatementMore;
+nonterminal DesignatorStatement;
+nonterminal ActParsList, CommaActPars, ActPars;
+nonterminal Assignop, Relop, Addop, Mulop, Setop;
+nonterminal Twodots, Label, Else;
+nonterminal ProgramName, BeforeWhile, BeforeForCond, For;
+nonterminal DoNonTerm, ActParsListBefore, WhileNonTerm, Final; /* dodatni cvorovi */
+
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Expr, TermList, Term, FactorList ,Factor, FactorLow, Type;
+nonterminal rs.etf.pp1.symboltable.concepts.Obj Designator, DesignatorArrRef, DesignatorArrName, DesignatorRef, DesignatorRecr, DesignatorRecrElem, MethodRetnName;
+nonterminal rs.etf.pp1.symboltable.concepts.Struct Condition, ConditionTermList, CondTerm, CondFactList, CondFact;
+
+
+
+precedence left ELSE;
+
+
+Program ::= (Program) PROG ProgramName ConstVarDeclList LEFTBRACE MethodDeclList RIGHTBRACE;
+
+ProgramName ::= (ProgramName) IDENT;
+
+ConstVarDeclList ::= (ConstVarDeclList_const) ConstVarDeclList ConstDeclList
+					 |
+					 (ConstVarDeclList_var) ConstVarDeclList VarDeclList
+					 |
+					 (ConstVarDeclList_e) /* epsilon */
+					 ;
+					 
+ConstDeclList ::= (ConstDeclList) CONST Type ConstDecl CommaConstDecl SEMI;
+
+ConstDecl ::= (ConstDecl) IDENT ASSIGN Constant;
+
+CommaConstDecl ::= (CommaConstDecl_comma) COMMA ConstDecl CommaConstDecl
+				   |
+				   (CommaConstDecl_e) /* epsilon */
+				   ;
+				   
+Constant ::= (Constant_num) NUMBER
+			 |
+			 (Constant_char) CHARACTER
+			 |
+			 (Constant_bool) BOOL
+			 ;
+
+VarDeclList ::= (VarDeclList) Final Type VarDecl CommaVarDecl SEMI;
+
+Final ::= (Final_f) FINAL
+		  |
+		  (Final_e) /* epsilon */
+		  ;
+
+
+VarDecl ::= (VarDecl_var) IDENT
+			|
+			(VarDecl_arr) IDENT LEFTBRACKET RIGHTBRACKET
+			;
+
+CommaVarDecl ::= (CommaVarDecl_comma) COMMA VarDecl CommaVarDecl
+				 |
+				 (CommaVarDecl_e) /* epsilon */
+				 ;
+					
+MethodDeclList ::= (MethodDeclList_more) MethodDeclList MethodDecl
+				   |
+				   (MethodDeclList_e) /* epsilon */
+				   ;			
+
+MethodDecl ::= (MethodDecl) MethodSignature VarDeclListMore LEFTBRACE StatementList RIGHTBRACE;
+
+MethodSignature ::= (MethodSignature) MethodRetnName LEFTPAREN FormParsList RIGHTPAREN;
+					
+
+MethodRetnName ::= (MethodRetnName_anytype) Type IDENT
+				   |
+				   (MethodRetnName_void) VOID IDENT
+				   ;
+				  
+
+				 
+FormParsList ::= (FormParsList_more) FormPars CommaFormPars
+				 |
+				 (FormParsList_e) /* epsilon */
+				 ;
+
+CommaFormPars ::= (CommaFormPars_comma) COMMA FormPars CommaFormPars
+				  |
+				  (CommaFormPars_e) /* epsilon */
+				  ;
+
+FormPars ::= (FormPars_var) Type IDENT
+			 |
+			 (FormPars_arr) Type IDENT LEFTBRACKET RIGHTBRACKET
+			 ;
+
+VarDeclListMore ::= (VarDeclListMore_more) VarDeclListMore VarDeclList
+					|
+					(VarDeclListMore_e) /* epsilon */
+					;
+				 
+Type ::= (Type) IDENT;
+
+StatementList ::= (StatementList_stmt) StatementList Statement 
+				  |
+				  (StatementList_e) /* epsilon */
+				  ;
+				  
+Statement ::= (Statement_single) SingleStatement
+			  |
+			  (Statement_more) StatementMore
+			  |
+			  (Statement_label) Label TWODOTS SingleStatement
+			  ;
+
+Label ::= (Label) IDENT;
+
+/*Statement ::= (Statement_label) Label Twodots SingleStatement; */
+			  
+SingleStatement ::= (SingleStatement_designatorStmt) DesignatorStatement SEMI
+					|
+					(SingleStatement_ifelse) IF LEFTPAREN Condition RIGHTPAREN Statement ElseStatement
+			  		| 
+			  		(SingleStatement_break) BREAK SEMI
+			  		|
+			  		(SingleStatement_continue) CONTINUE SEMI
+			  		|
+			  		(SingleStatement_retExpr) RETURN Expr SEMI
+			  		|
+			  		(SingleStatement_ret) RETURN SEMI
+			  		|
+			  		(SingleStatement_read) READ LEFTPAREN Designator RIGHTPAREN SEMI
+			  		|
+			  		(SingleStatement_print) PRINT LEFTPAREN Expr RIGHTPAREN SEMI
+			  		|
+			  		(SingleStatement_print_format) PRINT LEFTPAREN Expr COMMA NUMBER RIGHTPAREN SEMI
+			  		|
+			  		(SingleStatement_dowhile_nocond) DoNonTerm Statement WhileNonTerm LEFTPAREN RIGHTPAREN SEMI
+			  		|
+			  		(SingleStatement_dowhile_cond) DoNonTerm Statement WhileNonTerm LEFTPAREN Condition RIGHTPAREN SEMI
+			  		|
+			  		(SingleStatement_dowhile_cond_desStmt) DoNonTerm Statement WhileNonTerm LEFTPAREN Condition COMMA DesignatorStatement RIGHTPAREN SEMI
+					|
+					(SingleStatement_while) BeforeWhile WHILE LEFTPAREN Condition RIGHTPAREN Statement
+					|
+					(SingleStatement_for) For LEFTPAREN DesignatorStatement SEMI BeforeForCond Condition SEMI DesignatorStatement RIGHTPAREN Statement
+					;			  		
+		
+/*ss_goto GOTO IDENT SEMI - ne sme Label da bi se razlikovale same lab i da ne bi bilo konflikta pri skoku*/		
+		
+BeforeForCond ::= (BeforeForCond) /* epsilon */;		
+		
+BeforeWhile ::= (BeforeWhile) /* epsilon */ ;
+	
+For ::= (For) FOR;	
+		
+WhileNonTerm ::= (WhileNonTerm) WHILE;		
+		
+DoNonTerm ::= (DoNonTerm) DO;
+			  
+ElseStatement ::= (ElseStatement_yes) Else Statement
+				  |
+				  (ElseStatement_no) /* epsilon */
+				  ;
+				  
+Else ::= (Else) ELSE;
+
+StatementMore ::= (StatementMore) LEFTBRACE StatementList RIGHTBRACE;
+
+Condition ::= (Condition) ConditionTermList;
+
+ConditionTermList ::= (ConditionTermList_single) CondTerm
+					  |
+					  (ConditionTermList_recr) ConditionTermList OR CondTerm
+					  ;
+					  
+					  
+CondTerm ::= (CondTerm) CondFactList;
+
+CondFactList ::= (CondFactList_single) CondFact
+				 |
+				 (CondFactList_recursion) CondFactList AND CondFact
+				 ;
+	
+CondFact ::= (CondFact_expr) Expr
+			 |
+			 (CondFact_expr_rel_expr) Expr Relop Expr
+			 ;
+
+DesignatorStatement ::= (DesignatorStatement_assign) Designator Assignop Expr
+						|
+						/*(DesignatorStatement_error) error:e*/
+						/*{: parser.report_error("Oporavak od greske u DS. Linija: " + eleft, null); :}*/
+						/*|*/
+						(DesignatorStatement_actPars) Designator LEFTPAREN ActParsList RIGHTPAREN
+						|
+						(DesignatorStatement_inc) Designator INC
+						|
+						(DesignatorStatement_dec) Designator DEC
+						|
+						(DesignatorStatement_setop) Designator Assignop Designator Setop Designator
+						|
+						(DesignatorStatement_cappa) Designator CAPPA NUMBER
+						;
+
+ActParsList ::= (ActParsList_recr) ActParsListBefore ActPars CommaActPars
+				|
+				(ActParsList_e) ActParsListBefore
+				;
+
+ActParsListBefore ::= (ActParsListBefore) /* epsilon */ ; /* ne pravi konflikt, jer ActPars nece biti eps nego samo Expr */
+
+CommaActPars ::= (CommaActPars_more) COMMA ActPars CommaActPars
+				 |
+				 (CommaActPars_e) /* epsilon */	  
+				 ;
+
+ActPars ::= (ActPars) Expr;
+
+			 
+Expr ::= (Expr_terms) TermList
+		 |
+		 (Expr_map) Designator MAP Designator;
+
+TermList ::= (TermList_single) Term
+			 |
+			 (TermList_recr_addop) TermList Addop Term
+			 ;
+			 
+Term ::= (Term) FactorList;
+
+FactorList ::= (FactorList_single) Factor
+			   |
+			   (FactorList_recr_mulop) FactorList Mulop Factor
+			   ;
+
+Factor ::= (Factor_YesUnary) MINUS FactorLow
+		   |
+		   (Factor_NoUnary) FactorLow
+		   ;
+
+FactorLow ::= (FactorLow_desg_e) Designator
+			  |
+			  (FactorLow_desg_hash) HASH Designator
+		      |
+		      (FactorLow_desg_method_ActPars) Designator LEFTPAREN ActParsList RIGHTPAREN
+			  |
+			  (FactorLow_num) NUMBER
+			  |
+			  (FactorLow_char) CHARACTER
+			  |
+			  (FactorLow_bool) BOOL
+			  |
+			  (FactorLow_new_arr_expr) NEW Type LEFTBRACKET Expr RIGHTBRACKET
+			  |
+			  (FactorLow_expr_cast) LEFTPAREN Expr RIGHTPAREN
+			  ;
+			  	
+/*(FactorLow_new_arr_actpars) NEW Type LEFTPAREN ActParsList RIGHTPAREN*/
+			  	
+/* a.b[4].a[b.c[5]] */
+
+Designator ::= (Designator_var) IDENT
+			   |
+			   (Designator_elem) DesignatorArrName LEFTBRACKET Expr RIGHTBRACKET
+			   ;
+
+
+			   
+
+				   
+DesignatorArrName ::= (DesignatorArrName) IDENT;
+
+Assignop ::= (Assign) ASSIGN;
+
+Relop ::= (Eq) EQ
+		  |
+		  (Noteq) NOTEQ
+		  |
+		  (Grt) GRT
+		  |
+		  (Grteq) GRTEQ
+		  |
+		  (Lss) LSS
+		  |
+		  (Lsseq) LSSEQ
+		  ;
+
+Addop ::= (Plus) PLUS
+		  |
+		  (Minus) MINUS
+		  ;
+		  
+Mulop ::= (Mul) MUL
+		  |
+		  (Div) DIV
+		  |
+		  (Mod) MOD
+		  ;
+		  
+Setop ::= (Union) UNION;
+
+/*Twodots ::= (Twodots) TWODOTS;*/
+
+
+
+/*			   (Designator_recr) DesignatorRef DesignatorRecr
+			   |
+			   (Designator_elem_recr) DesignatorRecrElem DesignatorRecr
+			   ;
+			   
+DesignatorRecrElem ::= (DesignatorRecrElem) DesignatorArrName LEFTBRACKET Expr RIGHTBRACKET;
+			   
+
+DesignatorRecr ::= (DesignatorRecr_dot) DOT IDENT
+				   |
+				   (DesignatorRecr_recr_dot) DesignatorRecr DOT IDENT
+				   |
+				   (DesignatorRecr_dot_elem) DOT DesignatorArrRef LEFTBRACKET Expr RIGHTBRACKET
+				   |
+				   (DesignatorRecr_recr_elem) DesignatorRecr DOT DesignatorArrRef LEFTBRACKET Expr RIGHTBRACKET
+				   ;
+				   
+*/  
+
+/*DesignatorRef ::= (DesignatorRef) IDENT;*/
+/*DesignatorArrRef ::= (DesignatorArrRef) IDENT;*/
