@@ -6,11 +6,12 @@ Compiler for pseudocode MicroJava
 # How to run it:
 
 - Open the project from Eclipse IDE for Java.
-- Add every .jar file in the lib folder to the Build path (right click => Add to Build Path...).
+- Add every .jar file in the ~/lib folder to the Build path (right click => Add to Build Path...).
 - Right click on build.xml from project explorer => Run as => Option 2 Ant Build...
 - Then click on the "compile" checkbox which will build the project.
 - After successful message in the console, first refresh the project and run ~/test/rs/ac/bg/etf/pp1/Compiler.java based on the specified program in ~/test/program.mj .
 - Do the second step but uncheck "compile" and click on "runObj", after which the output will be in the console.
+- Folder ~/logs will appear, which will be having a history of results of every program.mj. It will include the following: assembly instructions, debug view of each instruction and the state of ExprStack and the stdout made possible by "MicroJava Virtual Machine" (implemented in ~/lib folder).
 
 *** Change the output to a file via the second step and the tab "Common" if the program cannot fit into the console.
 
